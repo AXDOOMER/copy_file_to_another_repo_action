@@ -64,6 +64,8 @@ git add .
 if git status | grep -q "Changes to be committed"
 then
   git commit --message "$INPUT_COMMIT_MESSAGE"
+  echo "Pulling before pushing the newest commit"
+  git pull -u origin HEAD:"$OUTPUT_BRANCH"
   echo "Pushing git commit"
   git push -u origin HEAD:"$OUTPUT_BRANCH"
 else
