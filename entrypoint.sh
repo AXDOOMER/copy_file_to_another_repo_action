@@ -63,14 +63,45 @@ echo "Adding git commit"
 git add .
 if git status | grep -q "Changes to be committed"
 then
-  git commit --message "$INPUT_COMMIT_MESSAGE"
-  echo "Pulling before pushing the newest commit"
-  git pull -u origin HEAD:"$OUTPUT_BRANCH"
-  sleep 2
-  echo "Pulling before pushing the newest commit"
-  git pull -u origin HEAD:"$OUTPUT_BRANCH"
-  echo "Pushing git commit"
+git commit --message "$INPUT_COMMIT_MESSAGE"
+echo ""
+echo "-----------------------------"
+echo "-- GIT PUSH"
+echo "-----------------------------"
+echo "[RUNNING]:   git push -u origin HEAD:"$OUTPUT_BRANCH""
   git push -u origin HEAD:"$OUTPUT_BRANCH"
+
+if [ $? -eq 0 ]; then
+  echo "[SUCCESS]: Pushed successfully!"
+  exit 0
+else
+  echo "[ERROR]: Push failed. Trying to pull --rebase"
+  git pull --rebase origin $OUTPUT_BRANCH
+  if [ $? -eq 0 ]; then
+    echo "[SUCCESS]: Pull worked! Trying to push again..."
+    echo "-----------------------------"
+    echo "-- GIT PUSH"
+    echo "-----------------------------"
+    git push -u origin HEAD:"$OUTPUT_BRANCH" || exit 1
+  else
+    echo "********************************************************************************************"
+    echo "[ERROR]: Pull failed..."
+    echo "[ERROR]: Seems there was a conflict during rebase with origin. Printing debug logs below and exiting."
+    echo "********************************************************************************************"
+    echo "***  DEBUG"
+    echo "********************************************************************************************"
+    echo "[INFO] Git status"
+    git status
+    echo "------------------------------------------------------"
+    echo "[INFO] Git log"
+    git log -n 5
+    echo "------------------------------------------------------"
+    echo "[INFO] Git diff"
+    git diff
+    echo "********************************************************************************************"
+    exit 1
+  fi
+fi
 else
   echo "No changes detected"
 fi
