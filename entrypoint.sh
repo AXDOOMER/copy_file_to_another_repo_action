@@ -66,9 +66,12 @@ then
   git commit --message "$INPUT_COMMIT_MESSAGE"
   echo "Pulling before pushing the newest commit"
   git pull origin "$OUTPUT_BRANCH"
-  sleep 2
+  sleep 4
   echo "Pulling before pushing the newest commit"
   git pull origin "$OUTPUT_BRANCH"
+  sleep 4
+  echo "Pulling before pushing the newest commit with rebase"
+  git pull origin "$OUTPUT_BRANCH" --rebase 
   echo "Pushing git commit"
   git push -u origin HEAD:"$OUTPUT_BRANCH"
 else
