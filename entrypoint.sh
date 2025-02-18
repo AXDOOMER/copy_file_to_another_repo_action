@@ -67,9 +67,6 @@ then
   echo "Pulling before pushing the newest commit"
   git pull origin "$OUTPUT_BRANCH"
   sleep 4
-  echo "Pulling before pushing the newest commit"
-  git pull origin "$OUTPUT_BRANCH"
-  sleep 4
   echo "Pulling before pushing the newest commit with rebase"
   git pull origin "$OUTPUT_BRANCH" --rebase 
   echo "Pushing git commit"
