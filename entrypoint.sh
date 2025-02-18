@@ -64,10 +64,9 @@ git add .
 if git status | grep -q "Changes to be committed"
 then
   git commit --message "$INPUT_COMMIT_MESSAGE"
-  echo "Pulling before pushing the newest commit"
-  git pull origin "$OUTPUT_BRANCH"
-  sleep 4
   echo "Pulling before pushing the newest commit with rebase"
+  git pull origin "$OUTPUT_BRANCH" --rebase 
+  sleep 4
   git pull origin "$OUTPUT_BRANCH" --rebase 
   echo "Pushing git commit"
   git push -u origin HEAD:"$OUTPUT_BRANCH"
