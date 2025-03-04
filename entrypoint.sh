@@ -64,12 +64,54 @@ git add .
 if git status | grep -q "Changes to be committed"
 then
   git commit --message "$INPUT_COMMIT_MESSAGE"
+  
+  # Pull with retry
   echo "Pulling before pushing the newest commit with rebase"
-  git pull origin "$OUTPUT_BRANCH" --rebase 
-  sleep 4
-  git pull origin "$OUTPUT_BRANCH" --rebase 
+  MAX_PULL_RETRIES=3
+  PULL_RETRY_COUNT=0
+  PULL_SUCCESS=false
+  
+  while [ $PULL_RETRY_COUNT -lt $MAX_PULL_RETRIES ] && [ "$PULL_SUCCESS" = "false" ]; do
+    if git pull origin "$OUTPUT_BRANCH" --rebase; then
+      PULL_SUCCESS=true
+      echo "Pull successful on attempt $((PULL_RETRY_COUNT+1))"
+    else
+      PULL_RETRY_COUNT=$((PULL_RETRY_COUNT+1))
+      if [ $PULL_RETRY_COUNT -lt $MAX_PULL_RETRIES ]; then
+        SLEEP_TIME=$((PULL_RETRY_COUNT * 5))
+        echo "Pull failed, retrying in $SLEEP_TIME seconds (attempt $PULL_RETRY_COUNT of $MAX_PULL_RETRIES)..."
+        sleep $SLEEP_TIME
+      else
+        echo "Failed to pull after $MAX_PULL_RETRIES attempts."
+        exit 1
+      fi
+    fi
+  done
+  
+  # Push with retry
   echo "Pushing git commit"
-  git push -u origin HEAD:"$OUTPUT_BRANCH"
+  MAX_PUSH_RETRIES=3
+  PUSH_RETRY_COUNT=0
+  PUSH_SUCCESS=false
+  
+  while [ $PUSH_RETRY_COUNT -lt $MAX_PUSH_RETRIES ] && [ "$PUSH_SUCCESS" = "false" ]; do
+    if git push -u origin HEAD:"$OUTPUT_BRANCH"; then
+      PUSH_SUCCESS=true
+      echo "Push successful on attempt $((PUSH_RETRY_COUNT+1))"
+    else
+      PUSH_RETRY_COUNT=$((PUSH_RETRY_COUNT+1))
+      if [ $PUSH_RETRY_COUNT -lt $MAX_PUSH_RETRIES ]; then
+        SLEEP_TIME=$((PUSH_RETRY_COUNT * 5))
+        echo "Push failed, retrying in $SLEEP_TIME seconds (attempt $PUSH_RETRY_COUNT of $MAX_PUSH_RETRIES)..."
+        sleep $SLEEP_TIME
+        # Pull again before retrying push
+        git pull origin "$OUTPUT_BRANCH" --rebase
+      else
+        echo "Failed to push after $MAX_PUSH_RETRIES attempts."
+        exit 1
+      fi
+    fi
+  done
 else
   echo "No changes detected"
 fi
