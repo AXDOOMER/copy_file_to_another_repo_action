@@ -8,6 +8,7 @@ then
   echo "Source file must be defined"
   return 1
 fi
+INPUT_SOURCE_FILE=$(echo "$INPUT_SOURCE_FILE" | tr '\n' ' ')
 
 if [ -z "$INPUT_GIT_SERVER" ]
 then
@@ -39,10 +40,10 @@ echo "Copying contents to git repo"
 mkdir -p $CLONE_DIR/$INPUT_DESTINATION_FOLDER
 if [ -z "$INPUT_USE_RSYNC" ]
 then
-  cp -R "$INPUT_SOURCE_FILE" "$DEST_COPY"
+  cp -R $INPUT_SOURCE_FILE "$DEST_COPY"
 else
   echo "rsync mode detected"
-  rsync -avrh "$INPUT_SOURCE_FILE" "$DEST_COPY"
+  rsync -avrh $INPUT_SOURCE_FILE "$DEST_COPY"
 fi
 
 cd "$CLONE_DIR"
