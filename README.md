@@ -1,29 +1,41 @@
 # copy_file_to_another_repo_action
-This GitHub Action copies a file from the current repository to a location in another repository
+This GitHub Action copies a file from the current repository to a location in another repository.
+
+This is a fork which fixes [a race condition](https://github.com/dmnemec/copy_file_to_another_repo_action/issues/85) and allows to copy multiple files at once to the destination repo.
 
 # Example Workflow
-    name: Push File
+```yml
+name: Push File
 
-    on: push
+on: push
 
-    jobs:
-      copy-file:
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout
-          uses: actions/checkout@v2
+jobs:
+  copy-file:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
 
-        - name: Pushes test file
-          uses: dmnemec/copy_file_to_another_repo_action@main
-          env:
-            API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-          with:
-            source_file: 'test2.md'
-            destination_repo: 'dmnemec/release-test'
-            destination_folder: 'test-dir'
-            user_email: 'example@email.com'
-            user_name: 'dmnemec'
-            commit_message: 'A custom message for the commit'
+    - name: Pushes test file
+      uses: AXDOOMER/copy_file_to_another_repo_action@main
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+      with:
+        source_file: 'test2.md'
+        destination_repo: 'AXDOOMER/release-test'
+        destination_folder: 'test-dir'
+        user_email: 'example@email.com'
+        user_name: 'AXDOOMER'
+        commit_message: 'A custom message for the commit'
+```
+
+Multiple files can be copied like so:
+```yml
+        source_file: |
+          tools/report/README.md
+          tools/report/index.html
+          tools/report/background.jpg
+```
 
 # Variables
 
